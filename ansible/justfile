@@ -1,0 +1,9 @@
+# Justfile for setting up and using HashiCorp Vault with Ansible
+deploy-local:
+    ansible-playbook -i localhost, -c local ansible/vault/tasks/main.yaml \
+    -e tasks_dir="$(pwd)/ansible/tasks" \
+    --skip-tags docker_install
+
+deploy-pi:
+    ansible-playbook vault.yml  --ask-pass --ask-become-pass \
+    -e tasks_dir="$(pwd)/tasks"

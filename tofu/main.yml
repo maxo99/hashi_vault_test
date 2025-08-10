@@ -1,0 +1,3 @@
+---
+- name: Fetch form Vault
+  ansible.builtin.import_tasks: fetch_from_vault.yml

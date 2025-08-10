@@ -1,0 +1,9 @@
+---
+- name: Fetch secret from Vault
+  community.hashi_vault.vault_kv2_get:
+    url: "http://127.0.0.1:8200"
+    path: proxmox
+    engine_mount_point: ansible
+    token_path: "/home/homelab"
+  register: proxmox_vault
+  delegate_to: localhost

@@ -1,0 +1,7 @@
+---
+current_username: maxo
+# ansible_python_interpreter: /usr/bin/python3
+
+install_zsh: true
+install_oh_my_zsh: true
+push_ssh_keys: true

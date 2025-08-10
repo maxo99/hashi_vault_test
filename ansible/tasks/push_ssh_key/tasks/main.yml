@@ -1,0 +1,72 @@
+---
+- name: Configure SSH key and passwordless sudo
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    public_key_path: "/home/{{ current_username }}/.ssh/id_rsa.pub"
+  block:
+    # Gestione directory e permessi SSH
+    - name: Ensure the SSH directory exists
+      file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    - name: Ensure authorized_keys exists
+      file:
+        path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        state: touch
+        mode: '0600'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    # Verifica chiave SSH esistente
+    - name: Check if SSH key already exists in authorized_keys
+      shell: "grep -F \"$(cat {{ public_key_path }})\" /home/{{ ansible_user }}/.ssh/authorized_keys || echo 'not_found'"
+      register: key_exists
+      changed_when: false
+      failed_when: false
+      become: true
+      become_user: "{{ ansible_user }}"
+
+    # Aggiunta chiave solo se non presente
+    - name: Add SSH public key if not present
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', public_key_path) }}"
+        manage_dir: false
+      become: true
+      when: key_exists.stdout == 'not_found'
+
+    # Set permission for authorized_keys
+    - name: Set correct permissions for authorized_keys
+      file:
+        path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        mode: '0600'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    # Configura sudo senza password
+    - name: Check if sudoers configuration exists
+      stat:
+        path: "/etc/sudoers.d/{{ ansible_user }}"
+      register: sudoers_file
+      become: true
+
+    - name: Configure sudo without password
+      lineinfile:
+        path: "/etc/sudoers.d/{{ ansible_user }}"
+        line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+        state: present
+        create: true
+        mode: '0440'
+        validate: 'visudo -cf %s'
+      become: true
+      when: not sudoers_file.stat.exists
