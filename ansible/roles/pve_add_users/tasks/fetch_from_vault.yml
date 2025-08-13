@@ -1,0 +1,20 @@
+---
+- name: Fetch secret from Vault
+  community.hashi_vault.vault_kv2_get:
+    url: "{{ lookup('env', 'VAULT_ADDR') }}"
+    path: proxmox
+    engine_mount_point: ansible
+    token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+    # TODO: Use a more secure auth method
+    # auth_method: approle  # More secure than token file
+  register: proxmox_vault
+  delegate_to: localhost
+  become: false  # Don't use sudo for this task
+
+- name: Set secret value to variable
+  ansible.builtin.set_fact:
+    _pve_admin_user_realm: "{{ proxmox_vault.data.data.pve_admin_user_realm }}"
+    _pve_admin_password: "{{ proxmox_vault.data.data.pve_admin_password }}"
+    # Authentik integration excluded for simple setup
+    # pve_authentik_client_secret: "{{ proxmox_vault.data.data.pve_authentik_client_secret }}"
+    # pve_authentik_client_id: "{{ proxmox_vault.data.data.pve_authentik_client_id }}"

@@ -8,7 +8,7 @@
 #     - role: localhost
 
 # - name: Verify ssh key presence
-#   hosts: k3s
+#   hosts: pve_01
 #   become: true
 #   gather_facts: true
 #   roles:
