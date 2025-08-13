@@ -1,0 +1,10 @@
+- name: Proxmox post install configuration
+  hosts: pve_01
+  become: true
+  vars:
+    ansible_user: '{{ pve_root_user }}'
+    ansible_password: '{{ lookup(''env'', ''PVE_ROOT_PASSWORD'') }}'
+  roles:
+    - pve_post_install
+    # - pve_update_firewall
+    - pve_add_users # Now enabled with Vault secrets configured

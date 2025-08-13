@@ -1,12 +1,11 @@
 ---
 - name: Fetch secret from Vault
   community.hashi_vault.vault_kv2_get:
-    url: "http://192.168.4.185:8200"  # Option 1: Direct Pi IP for laptop development
+    url: "{{ lookup('env', 'VAULT_ADDR') }}"
     path: proxmox
     engine_mount_point: ansible
-    token: "{{ lookup('env', 'VAULT_TOKEN') }}"  # Use token from environment instead of file
-    # TODO: Option 2 - Use vault_addr environment variable and proper auth method
-    # url: "{{ vault_url | default('http://192.168.4.185:8200') }}"
+    token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+    # TODO: Use a more secure auth method
     # auth_method: approle  # More secure than token file
   register: proxmox_vault
   delegate_to: localhost

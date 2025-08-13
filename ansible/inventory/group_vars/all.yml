@@ -2,6 +2,25 @@
 current_username: maxo
 # ansible_python_interpreter: /usr/bin/python3
 
+timezone: "America/New_York"
+locale: "en_US.UTF-8"
+
+domain: "home.lab"
+
+dns_servers:
+  - "8.8.8.8"       # Google DNS
+  - "1.1.1.1"       # Cloudflare DNS
+
 install_zsh: true
 install_oh_my_zsh: true
 push_ssh_keys: true
+
+pve_root_user: root
+ # Modify the value with the password you used when configuring proxmox. If it's not the same password on each node, you have to define the password on the host_vars
+# Option 1: Laptop-based SSH key paths (aligned with justfile)
+# pve_root_ssh_private_key_file: "~/.ssh/homelab/root"
+pve_root_ssh_public_key_file: "~/.ssh/homelab/root.pub"
+
+
+# external_secrets:
+#   vault_token: "{{ lookup('community.hashi_vault.hashi_vault', 'ansible/data/external-secrets:vault_token') }}"
