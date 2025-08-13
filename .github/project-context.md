@@ -113,4 +113,5 @@ ansible/
 2. Generate and store API tokens
 3. Test full SSH key automation workflow
 4. Migrate to Option 2 (Vault-centric) approach
+    4a. Update vault role to pre-enable kv and SSH engine.
 5. Implement VM provisioning with OpenTofu

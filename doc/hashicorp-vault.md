@@ -3,6 +3,7 @@
 ## Installation setup
 <!-- - Used installation steps from: [Raspberry Pi installation](https://techfrontier.me.uk/post/vault-on-a-pi/)
 - Updated Systemd with steps from: [medium article](https://medium.com/ankercloud-engineering/a-quick-guide-to-set-up-hashicorp-vaults-ssh-secrets-engine-dce3b916bfae) -->
+<!-- - Used installation steps from: [Raspberry Pi installation](https://techfrontier.me.uk/post/vault-on-a-pi/)
 
 ## SSH Setup
 <!-- To set up SSH access using HashiCorp Vault, begin by enabling the SSH secrets engine and generating a Certificate Authority (CA) key pair. This is done by running vault secrets enable -path=ssh-client-signer ssh and then vault write ssh-client-signer/config/ca generate_signing_key=true to create the CA, which will output the public key needed for host configuration.
