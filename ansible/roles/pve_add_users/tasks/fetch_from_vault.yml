@@ -1,0 +1,21 @@
+---
+- name: Fetch secret from Vault
+  community.hashi_vault.vault_kv2_get:
+    url: "http://192.168.4.185:8200"  # Option 1: Direct Pi IP for laptop development
+    path: proxmox
+    engine_mount_point: ansible
+    token: "{{ lookup('env', 'VAULT_TOKEN') }}"  # Use token from environment instead of file
+    # TODO: Option 2 - Use vault_addr environment variable and proper auth method
+    # url: "{{ vault_url | default('http://192.168.4.185:8200') }}"
+    # auth_method: approle  # More secure than token file
+  register: proxmox_vault
+  delegate_to: localhost
+  become: false  # Don't use sudo for this task
+
+- name: Set secret value to variable
+  ansible.builtin.set_fact:
+    _pve_admin_user_realm: "{{ proxmox_vault.data.data.pve_admin_user_realm }}"
+    _pve_admin_password: "{{ proxmox_vault.data.data.pve_admin_password }}"
+    # Authentik integration excluded for simple setup
+    # pve_authentik_client_secret: "{{ proxmox_vault.data.data.pve_authentik_client_secret }}"
+    # pve_authentik_client_id: "{{ proxmox_vault.data.data.pve_authentik_client_id }}"
