@@ -1,6 +1,4 @@
 ---
-- name: Fetch form Vault
-  ansible.builtin.import_tasks: fetch_from_vault.yml
 
 - name: Create the Proxmox Ansible User
   ansible.builtin.import_tasks: pve_add_ansible_user.yml

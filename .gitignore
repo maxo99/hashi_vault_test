@@ -1,1 +1,11 @@
+doc/_tmp.md
 **/*.env
+**/.terraform
+**/.terraform.lock.hcl
+
+*.tfvars
+*.tfvars.json
+
+# .tfstate files
+*.tfstate
+*.tfstate.*

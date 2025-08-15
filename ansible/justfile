@@ -1,56 +1,14 @@
-# Justfile for setting up and using HashiCorp Vault with Ansible
+## Justfile
+
 set dotenv-load
+
+
 
 default:
     just --list
 
-# Vault operations - load VAULT_TOKEN from .env file
-vault-health:
-    @echo "Checking Vault health..."
-    curl -s ${VAULT_ADDR}/v1/sys/health | jq .
-
-vault-enable-kv:
-    @echo "Enabling KV v2 engine at ansible/ path..."
-    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
-         -H "Content-Type: application/json" \
-         -X POST \
-         -d '{"type":"kv","options":{"version":"2"}}' \
-         ${VAULT_ADDR}/v1/sys/mounts/ansible
-
-vault-store-pve-secrets:
-    @echo "Storing minimal PVE secrets in Vault..."
-    @echo "Using Vault at: ${VAULT_ADDR}"
-    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
-         -H "Content-Type: application/json" \
-         -X POST \
-         -d '{"data":{"pve_admin_user_realm":"'${PVE_ADMIN_USER_REALM}'","pve_admin_password":"'${PVE_ADMIN_PASSWORD}'"}}' \
-         ${VAULT_ADDR}/v1/ansible/data/proxmox
-
-vault-get-pve-secrets:
-    @echo "Retrieving PVE secrets from Vault..."
-    @echo "Using Vault at: ${VAULT_ADDR}"
-    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
-         ${VAULT_ADDR}/v1/ansible/data/proxmox | jq .
-
-
-# deploy-local:
-#     ansible-playbook -i localhost, -c local ansible/vault/tasks/main.yaml \
-#     -e tasks_dir="$(pwd)/ansible/tasks" \
-#     --skip-tags docker_install
-
-deploy-pivault:
-    @echo "Using Python virtual environment at ansible/.venv"
-    .venv/bin/ansible-playbook vault.yml  --ask-pass --ask-become-pass \
-    -e tasks_dir="$(pwd)/tasks"
-
-
-run-pve-post-install:
-    @echo "Using Python virtual environment at ansible/.venv"
-    env VAULT_TOKEN="${VAULT_TOKEN}" VAULT_ADDR="${VAULT_ADDR}" \
-    .venv/bin/ansible-playbook pve_post_install.yml \
-    -e tasks_dir="$(pwd)/tasks"
-
-
+ansible-list:
+    .venv/bin/ansible-inventory --list -v
 
 create_ssh_key_tprov:
     echo 'Creating SSH key for terraform-prov@pve...'
@@ -79,15 +37,57 @@ copy-ssh-key-to-proxmox_tprov:
     ssh root@${PVE_01} "chmod 700 /home/terraform-prov/.ssh && chmod 600 /home/terraform-prov/.ssh/authorized_keys"
     ssh root@${PVE_01} "rm /tmp/terraform-prov.pub"
 
+# copy-ssh-key-to-proxmox_root:
+#     @echo "Copying SSH key to Proxmox host ${PVE_01} for root user..."
+#     scp ~/.ssh/homelab/root.pub root@${PVE_01}:/tmp/root.pub
+#     ssh root@${PVE_01} << EOF
+#     echo "Creating .ssh directory for root user..."
+#     mkdir -p /home/root/.ssh
+#     echo "Appending public key to authorized_keys..."
+#     cat /tmp/root.pub >> /home/root/.ssh/authorized_keys
+#     echo "Setting ownership and permissions for .ssh directory..."
+#     chown -R root:root /home/root/.ssh
+#     chmod 700 /home/root/.ssh
+#     chmod 600 /home/root/.ssh/authorized_keys
+#     echo "Cleaning up temporary public key file..."
+#     rm /tmp/root.pub
 
-copy-ssh-key-to-proxmox_root:
-    @echo "Copying SSH key to Proxmox host ${PVE_01} for root user..."
-    scp ~/.ssh/homelab/root.pub root@${PVE_01}:/tmp/root.pub
-    ssh root@${PVE_01} "mkdir -p /home/root/.ssh"
-    ssh root@${PVE_01} "cat /tmp/root.pub >> /home/root/.ssh/authorized_keys"
-    ssh root@${PVE_01} "chown -R root:root /home/root/.ssh"
-    ssh root@${PVE_01} "chmod 700 /home/root/.ssh && chmod 600 /home/root/.ssh/authorized_keys"
-    ssh root@${PVE_01} "rm /tmp/root.pub"
 
-ansible-list:
-    .venv/bin/ansible-inventory --list -vvv
+
+
+
+vault-health:
+    @echo "Checking Vault health..."
+    curl -s ${VAULT_ADDR}/v1/sys/health | jq .
+
+vault-enable-kv:
+    @echo "Enabling KV v2 engine at ansible/ path..."
+    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
+         -H "Content-Type: application/json" \
+         -X POST \
+         -d '{"type":"kv","options":{"version":"2"}}' \
+         ${VAULT_ADDR}/v1/sys/mounts/ansible
+
+vault-store-pve-secrets:
+    @echo "Storing minimal PVE secrets in Vault..."
+    @echo "Using Vault at: ${VAULT_ADDR}"
+    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
+         -H "Content-Type: application/json" \
+         -X POST \
+         -d '{"data":{"pve_admin_user_realm":"'${PVE_ADMIN_USER_REALM}'","pve_admin_password":"'${PVE_ADMIN_PASSWORD}'"}}' \
+         ${VAULT_ADDR}/v1/ansible/data/proxmox
+
+vault-get-pve-secrets:
+    @echo "Retrieving PVE secrets from Vault..."
+    @echo "Using Vault at: ${VAULT_ADDR}"
+    curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
+         ${VAULT_ADDR}/v1/ansible/data/proxmox | jq .
+
+
+
+deploy-pivault:
+    .venv/bin/ansible-playbook vault.yml  --ask-pass --ask-become-pass \
+    -e tasks_dir="$(pwd)/tasks"
+
+run-pve_setup:
+    .venv/bin/ansible-playbook pve_setup.yml 

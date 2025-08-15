@@ -1,0 +1,27 @@
+- name: Proxmox post install configuration
+  hosts: pve_01
+  become: true
+  vars:
+    ansible_user: '{{ pve_root_user }}'
+  pre_tasks:
+    - name: Fetch Proxmox secrets from Vault
+      community.hashi_vault.vault_kv2_get:
+        path: proxmox
+        engine_mount_point: ansible
+        url: "{{ lookup('env', 'VAULT_ADDR') }}"
+        token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+      register: proxmox_vault_secrets
+      delegate_to: localhost
+      become: false
+    
+    - name: Set Proxmox secret values to variables
+      ansible.builtin.set_fact:
+        _pve_admin_user_realm: "{{ proxmox_vault_secrets.data.data.pve_admin_user_realm }}"
+        _pve_admin_password: "{{ proxmox_vault_secrets.data.data.pve_admin_password }}"
+        # Authentik integration excluded for simple setup
+        # pve_authentik_client_secret: "{{ proxmox_vault_secrets.data.data.pve_authentik_client_secret }}"
+        # pve_authentik_client_id: "{{ proxmox_vault_secrets.data.data.pve_authentik_client_id }}"
+  roles:
+    - pve_post_install
+    # - pve_update_firewall
+    - pve_add_users # Now enabled with Vault secrets configured
