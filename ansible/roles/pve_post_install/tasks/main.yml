@@ -11,3 +11,6 @@
 
 - name: Configure Fail2Ban
   ansible.builtin.include_tasks: fail2ban.yml
+
+- name: Configure Node Sensor Readings
+  ansible.builtin.include_tasks: node_sensor_readings.yml
