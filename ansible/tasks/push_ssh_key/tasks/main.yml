@@ -6,7 +6,7 @@
   vars:
     public_key_path: "/home/{{ current_username }}/.ssh/id_rsa.pub"
   block:
-    # Gestione directory e permessi SSH
+    # Directory management and SSH permissions
     - name: Ensure the SSH directory exists
       file:
         path: "/home/{{ ansible_user }}/.ssh"
@@ -25,7 +25,7 @@
         group: "{{ ansible_user }}"
       become: true
 
-    # Verifica chiave SSH esistente
+    # Check existing SSH key
     - name: Check if SSH key already exists in authorized_keys
       shell: "grep -F \"$(cat {{ public_key_path }})\" /home/{{ ansible_user }}/.ssh/authorized_keys || echo 'not_found'"
       register: key_exists
@@ -34,7 +34,7 @@
       become: true
       become_user: "{{ ansible_user }}"
 
-    # Aggiunta chiave solo se non presente
+    # Added key only if not present
     - name: Add SSH public key if not present
       authorized_key:
         user: "{{ ansible_user }}"
@@ -53,7 +53,7 @@
         group: "{{ ansible_user }}"
       become: true
 
-    # Configura sudo senza password
+    # Configure sudo without password
     - name: Check if sudoers configuration exists
       stat:
         path: "/etc/sudoers.d/{{ ansible_user }}"
