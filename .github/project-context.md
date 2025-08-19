@@ -9,7 +9,7 @@ This repository is for learning and implementing Infrastructure as Code (IaC) wi
 ### Current Environment
 
 - **Proxmox VE**: Newly deployed instance
-- **HashiCorp Vault**: Running on Raspberry Pi (version 1.20.1)
+- **HashiCorp Vault**: Running in Docker container on dedicated host (version 1.20.1)
 - **Development Machine**: Laptop running Linux with Ansible in Python virtual environment
 - **SSH Keys**: Stored in `~/.ssh/homelab/` directory structure for laptop-based development
 
@@ -21,9 +21,11 @@ Network details, DNS servers, domain, and timezone are configured in `ansible/in
 
 ### Completed Tasks
 
-- ✅ HashiCorp Vault setup and unsealing
-- ✅ Vault KV v2 engine enabled at `ansible/` path
-- ✅ Ansible virtual environment setup with hvac library
+- ✅ HashiCorp Vault deployment via Docker and Ansible automation
+- ✅ Vault initialization, unsealing, and post-install configuration
+- ✅ Vault KV v2 engines enabled at `ansible/` and `terraform/` paths
+- ✅ Vault AppRole authentication configured for CI/CD workflows
+- ✅ Ansible virtual environment setup with required dependencies
 - ✅ Basic Proxmox post-install configuration (repositories, packages, DNS, fail2ban)
 - ✅ SSH key generation for terraform-prov user
 - ✅ Vault secrets storage and retrieval integration
@@ -39,19 +41,25 @@ Network details, DNS servers, domain, and timezone are configured in `ansible/in
 
 #### Ansible Configuration
 
-- **Virtual Environment**: `ansible/.venv/` with hvac library
+- **Virtual Environment**: `ansible/.venv/` with required dependencies
 - **Inventory**: `ansible/inventory/hosts.ini`
 - **Environment Variables**: `ansible/.env` (contains VAULT_TOKEN and VAULT_ADDR)
-- **Main Playbook**: `ansible/pve_post_install.yml`
+- **Main Playbooks**:
+  - `ansible/vault_deploy.yml` - Vault deployment and container setup
+  - `ansible/vault_post_install.yml` - Vault configuration and policy setup
+  - `ansible/pve_setup.yml` - Proxmox post-install configuration
 - **Global Variables**: `ansible/inventory/group_vars/all.yml`
+- **Vault Variables**: `ansible/inventory/group_vars/vault.yml`
 - **Host-specific Variables**: `ansible/inventory/group_vars/pve_01/vars.yml`
 
 #### Vault Integration
 
-- **KV Engine**: `ansible/` path in Vault
+- **KV Engines**: `ansible/` and `terraform/` paths in Vault
 - **Secrets Path**: `ansible/data/proxmox`
 - **Stored Secrets**: Admin credentials for initial Proxmox access
-- **Authentication**: Root token stored in .env file
+- **Authentication**: Root token accessed via environment variable
+- **AppRole**: Configured for CI/CD automation (future use)
+- **Deployment**: Docker container with persistent storage and init script
 
 ## Automation Strategy
 
@@ -81,19 +89,11 @@ source .venv/bin/activate
 
 ### Available Commands
 
-The project uses a `justfile` for command automation. Run `just --list` in the `ansible/` directory to see all available commands including vault operations, deployment, and SSH key management.
+The project uses a `justfile` for command automation. Run `just --list` in the `ansible/` directory to see all available commands.
 
 ## Repository Structure
 
-```text
-ansible/
-├── .env                    # Vault credentials and endpoints
-├── .venv/                  # Python virtual environment
-├── justfile                # Command automation (run `just --list`)
-├── pve_post_install.yml    # Main playbook
-├── inventory/              # Ansible inventory and variables
-└── roles/                  # Ansible roles for configuration
-```
+The main components are organized under the `ansible/` directory with playbooks, roles, and inventory configuration. Use standard file system tools or your editor to explore the current structure.
 
 ## Known Issues and Resolutions
 
@@ -107,11 +107,16 @@ ansible/
 - **Issue**: Token needs to be available to Ansible tasks
 - **Solution**: Environment variables set via justfile or manual export
 
+### Vault Policy Parsing
+
+- **Issue**: Policy creation failed with HCL parsing errors
+- **Solution**: Simplified policy generation using heredoc syntax and proper cleanup
+
 ## Next Steps
 
 1. Complete Proxmox API group/user creation
-2. Generate and store API tokens
+2. Generate and store API tokens in Vault
 3. Test full SSH key automation workflow
-4. Migrate to Option 2 (Vault-centric) approach
-    4a. Update vault role to pre-enable kv and SSH engine.
-5. Implement VM provisioning with OpenTofu
+4. Implement VM provisioning with OpenTofu/Terraform
+5. Migrate to Vault-centric SSH key management approach
+6. Consider implementing CI/CD workflows using AppRole authentication

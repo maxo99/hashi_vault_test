@@ -2,6 +2,15 @@
 # Except the api_token_file_path, all other files and variables should be existing before running any playbook
 
 ########################
+## VAULT MANAGEMENT   ##
+########################
+# Set this after manual Vault initialization
+# vault_root_token: "your-root-token-from-vault-init"
+# Consider using ansible-vault encrypt for security:
+# ansible-vault encrypt_string 'your-actual-root-token' --name 'vault_root_token'
+vault_root_token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+
+########################
 ## PROXMOX MANAGEMENT ##
 ########################
 # Proxmox root default user

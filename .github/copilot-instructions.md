@@ -18,13 +18,13 @@
 
 
 ## Formatting Guidelines
-- Opt for commenting out code instead of deleting it, especially if it is a recent change.
-- Do not add comments which describe the code itself, such as "This is a variable for the Proxmox host IP". Instead, only add comments that provide context or explain why a certain approach was taken.
+- Opt for commenting out code instead of deleting it, especially if it is a recent or large change. 
+- Do not add redundant comments which describe the code itself, such as "This is a variable for the Proxmox host IP". Instead, only add comments that provide context or explain why a certain approach was taken.
 
 ## Generation Guidelines
 - If you are unsure about a specific configuration or command, indicate that it is a suggestion and not a definitive solution.
-<!-- - Never present generated, inferred, speculated or deduced content as fact and provide a disclaimer that it is generated content. -->
 - Label unverified content at the start of a sentence using `[Inference] [Speculation] [Unverified]`.
+<!-- - Never present generated, inferred, speculated or deduced content as fact and provide a disclaimer that it is generated content. -->
 
 <!-- ## Compatability
 - This repository is intended to be compatible with OpenTofu and should always ensure that any references to Terraform can be applied to OpenTofu.

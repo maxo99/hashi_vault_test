@@ -1,19 +1,21 @@
 ---
 current_username: maxo
 # ansible_python_interpreter: /usr/bin/python3
+tasks_dir: ./tasks
 
 timezone: "America/New_York"
 locale: "en_US.UTF-8"
 
 domain: "home.lab"
-
 dns_servers:
+  - "192.168.4.1"   # Gateway
   - "8.8.8.8"       # Google DNS
   - "1.1.1.1"       # Cloudflare DNS
 
 install_zsh: true
 install_oh_my_zsh: true
 push_ssh_keys: true
+
 
 pve_root_user: root
  # Modify the value with the password you used when configuring proxmox. If it's not the same password on each node, you have to define the password on the host_vars

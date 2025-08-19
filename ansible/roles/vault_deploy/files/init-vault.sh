@@ -4,7 +4,6 @@ set -euo pipefail
 # CONFIGURATIONS
 POLICY_NAME="ci-policy"
 ROLE_NAME="ci-role"
-# Use an array to specify multiple secret paths
 SECRET_PATHS="ansible terraform"
 VAULT_ADDR="${VAULT_ADDR:-http://127.0.0.1:8200}"
 VAULT_TOKEN="${VAULT_TOKEN:?VAULT_TOKEN missing}"
@@ -14,9 +13,8 @@ apk add jq
 
 echo "[+] Init Vault..."
 
-#  Enable all secret engines specified in the array
+# Enable all secret engines specified in the array
 for SECRET_PATH in $SECRET_PATHS; do
-  # Check if secret engine is already enabled
   if vault secrets list -format=json | jq -e ".[\"$SECRET_PATH/\"]" > /dev/null 2>&1; then
     echo "[+] Secret engine '$SECRET_PATH/' already enabled."
   else
@@ -33,27 +31,25 @@ else
   vault auth enable approle
 fi
 
-# Create a policy that includes all specified paths
+# Create policy
 echo "[+] Writing policy '$POLICY_NAME'..."
 
-# Start the policy with an empty header
-POLICY_CONTENT=""
+# Delete existing policy if present
+vault policy delete "$POLICY_NAME" 2>/dev/null || true
 
-# Add each path to the policy
-for SECRET_PATH in $SECRET_PATHS; do
-  POLICY_CONTENT="$POLICY_CONTENT
-  path \"$SECRET_PATH/data/*\" {
-    capabilities = [\"create\", \"read\", \"update\", \"delete\", \"list\"]
-  }"
-done
+vault policy write "$POLICY_NAME" - <<'POLICY_EOF'
+path "ansible/data/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
 
-POLICY_CONTENT="$POLICY_CONTENT
+path "terraform/data/*" {
+  capabilities = ["create", "read", "update", "delete", "list"]
+}
+
 path "auth/token/create" {
   capabilities = ["update"]
-}"
-
-# Write the complete policy
-echo "$POLICY_CONTENT" | vault policy write "$POLICY_NAME" -
+}
+POLICY_EOF
 
 # Check if role is already created
 if vault read -format=json "auth/approle/role/$ROLE_NAME" > /dev/null 2>&1; then

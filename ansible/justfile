@@ -83,11 +83,20 @@ vault-get-pve-secrets:
     curl -H "X-Vault-Token: ${VAULT_TOKEN}" \
          ${VAULT_ADDR}/v1/ansible/data/proxmox | jq .
 
+vault-deploy:
+    .venv/bin/ansible-playbook \
+    vault_deploy.yml \
+    -b \
+    --ask-pass --ask-become-pass \
+    -v
 
+vault-configure:
+    .venv/bin/ansible-playbook \
+    vault_post_install.yml \
+    -b \
+    --ask-pass --ask-become-pass \
+    -v
 
-deploy-pivault:
-    .venv/bin/ansible-playbook vault.yml  --ask-pass --ask-become-pass \
-    -e tasks_dir="$(pwd)/tasks"
 
 run-pve_setup:
     .venv/bin/ansible-playbook pve_setup.yml 
